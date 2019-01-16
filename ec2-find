@@ -93,6 +93,7 @@ function instance_jq_filter() {
       tags: $(instance_tags_jq_filter),
       id: .InstanceId,
       ip: .PublicIpAddress,
+      privip: .PrivateIpAddress,
       keyname: .KeyName,
       name: ((.Tags[] | select(.Key == \"Name\")) // {}) | .Value,
       type: .InstanceType,
@@ -136,7 +137,7 @@ state_color() {
 }
 
 function get_format_string() {
-  printf "%s" "%-8s %-11s %-20s %-15s %-$(tag_width Name)s"
+  printf "%s" "%-8s %-11s %-20s %-15s %-15s %-20s %-$(tag_width Name)s"
   for ((i=1; i<=tag_count; i++)); do
     [[ "${tag_names[i]}" != "Name" ]] && printf "%s" "  %-${tag_widths[i]}s"
   done
@@ -168,6 +169,7 @@ function print_full_line() {
     "$(echo "$1" | jq -r .type)" \
     "$(echo "$1" | jq -r .id)" \
     "$(echo "$1" | jq -r .ip)" \
+    "$(echo "$1" | jq -r .privip)" \
     "$(echo "$1" | jq -r .keyname)" \
     "$(echo "$1" | jq -r .name)" \
     "${tags[@]}"
@@ -175,7 +177,7 @@ function print_full_line() {
 }
 
 function print_header_line() {
-  local headers=("State" "Type" "Id" "Public IP" "KeyPair" "Name")
+  local headers=("State" "Type" "Id" "Public IP" "Private IP" "KeyPair" "Name")
   for tag_name in "${tag_names[@]}"; do
     [[ "$tag_name" != "Name" ]] && headers+=("${tag_name}")
   done
